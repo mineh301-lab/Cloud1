@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>하이닉스 10월 1일 복기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+:root {
+  --bg: #0f172a; --card: #1e293b; --border: #334155; --grid: #263247;
+  --text: #e2e8f0; --muted: #94a3b8;
+  --up: #ef4444; --down: #3b82f6; --sell: #f97316; --buy: #22c55e; --mod: #94a3b8;
+  --rule: #2dd4bf; --open: #f59e0b; --warn: #fb923c; --good: #34d399;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --sans: "IBM Plex Sans KR", system-ui, sans-serif;
+}
+:root[data-theme="light"] {
+  --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --grid: #eef2f7;
+  --text: #1e293b; --muted: #64748b;
+  --buy: #15803d; --mod: #64748b; --rule: #0f766e; --open: #b45309; --warn: #c2410c; --good: #047857;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.65; font-size: 16px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px 64px; }
+header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.eyebrow { font-family: var(--mono); font-size: 13px; color: var(--muted); letter-spacing: 0.02em; margin: 0 0 8px; }
+h1 { font-size: clamp(22px, 3.2vw, 30px); line-height: 1.4; margin: 0 0 12px; font-weight: 600; max-width: 30em; }
+h2 { font-size: 20px; margin: 48px 0 12px; font-weight: 600; }
+p { margin: 0 0 12px; max-width: 46em; }
+.lead { color: var(--muted); }
+button { font: inherit; }
+.theme { flex: none; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; min-height: 44px; cursor: pointer; font-size: 14px; }
+.theme:focus-visible, .jump button:focus-visible, summary:focus-visible { outline: 2px solid var(--rule); outline-offset: 2px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-top: 20px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.sw { width: 26px; height: 0; border-top: 2px dashed currentColor; display: inline-block; }
+.sw.solid { border-top-style: solid; }
+.sw.dot { border-top: 3px dotted currentColor; }
+.readout { font-family: var(--mono); font-size: 13px; color: var(--muted); min-height: 1.6em; margin: 4px 0 8px; }
+#price { height: 460px; }
+#rs { height: 150px; margin-top: 6px; }
+.caption { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.jump button { background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; min-height: 44px; cursor: pointer; font-size: 13px; font-family: var(--mono); }
+.jump button:hover { border-color: var(--rule); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 13px; }
+td.num, th.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
+td.t { font-family: var(--mono); white-space: nowrap; }
+td.k { white-space: nowrap; }
+.scroll { overflow-x: auto; }
+.miss { color: var(--warn); }
+.ok { color: var(--good); }
+details { margin-top: 12px; }
+summary { cursor: pointer; color: var(--muted); min-height: 44px; display: flex; align-items: center; }
+.rules td:first-child { white-space: nowrap; font-weight: 600; }
+footer { margin-top: 48px; font-size: 13px; color: var(--muted); }
+footer p { max-width: none; }
+@media (max-width: 640px) {
+  #price { height: 340px; }
+  #rs { height: 120px; }
+  header { flex-direction: column; }
+  th, td { padding: 6px 6px; font-size: 13px; }
+}
+@media print {
+  .theme, .jump { display: none; }
+  body { background: #fff; color: #000; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <p class="eyebrow">매매복기 2026-10-01 SK하이닉스(000660) 1분봉 09:00~{{LAST}}</p>
+    <h1>11시에 사지 않은 판단은 손해가 아니었습니다</h1>
+    <p class="lead">고칠 곳은 계획보다 깊게 건 가격과, 멀어지는 시세를 따라 올린 세 번의 정정입니다. 초록 실선은 사용자님이 실제로 걸어 두셨던 매수 주문이 언제부터 언제까지 어느 가격에 있었는지 보여 줍니다. 청록 점선은 실행규칙 1~4를 그대로 따랐다면 {{R1T}}부터 걸었을 당일 시가 주문입니다. 오늘은 두 주문 모두 체결되지 않았습니다.</p>
+  </div>
+  <button class="theme" id="theme" type="button" aria-pressed="false">밝은 화면으로 보기</button>
+</header>
+
+<section class="card" aria-labelledby="chart-title">
+  <h2 id="chart-title" style="margin-top:0">걸어 둔 주문과 주가의 거리</h2>
+  <div class="legend" aria-hidden="true">
+    <span style="color:var(--text)"><i class="sw"></i>9/30 종가 1,776,000</span>
+    <span style="color:var(--open)"><i class="sw"></i>10/1 시가 1,762,000</span>
+    <span style="color:var(--buy)"><i class="sw solid"></i>실제로 걸려 있던 매수 주문</span>
+    <span style="color:var(--rule)"><i class="sw dot"></i>규칙대로라면 걸었을 주문</span>
+    <span style="color:var(--sell)">매도 체결 표시는 봉 위 주황 화살표</span>
+  </div>
+  <div class="readout" id="readout" aria-live="polite">차트 위에 마우스를 올리면 그 분의 가격과 지수 대비 강도가 여기 나옵니다.</div>
+  <div id="price" role="img" aria-label="SK하이닉스 10월 1일 1분봉 차트. 사용자님 매수 주문 가격선과 규칙상 주문 가격선, 매도 체결과 주문 정정 표시가 함께 그려져 있습니다. 같은 내용은 아래 표에 글로 있습니다."></div>
+  <div id="rs" role="img" aria-label="하이닉스 시가 대비 등락률에서 코스피 시가 대비 등락률을 뺀 값의 1분 추이"></div>
+  <p class="caption">아래 칸은 하이닉스 시가 대비 등락률에서 코스피 시가 대비 등락률을 뺀 값입니다. 0보다 위면 그 분에 하이닉스가 지수보다 강했다는 뜻이고, 오늘은 {{RSNEG}}을 빼면 {{LAST}}까지 줄곧 0보다 위에 있었습니다.</p>
+  <div class="jump" id="jump" aria-label="시각으로 이동"></div>
+</section>
+
+<h2>오늘 하이닉스 주문 흐름</h2>
+<p>매수 주문은 접수 시각마다 그 분 1분봉의 저가와 비교했습니다. 주문가가 그 분 저가보다 아래면 그 분에는 닿지 않은 것입니다.</p>
+<div class="card scroll">
+<table>
+  <thead><tr><th>시각</th><th>주문</th><th class="num">가격</th><th class="num">수량</th><th>결과</th><th class="num">그 분 저가~고가</th><th>저가와의 거리</th></tr></thead>
+  <tbody>{{BUY_ROWS}}</tbody>
+</table>
+<details>
+  <summary>아침 매도 주문 {{SELL_COUNT}}행 펼쳐 보기 (08:46~10:08)</summary>
+  <table>
+    <thead><tr><th>시각</th><th>주문</th><th class="num">가격</th><th class="num">수량</th><th>결과</th><th class="num">그 분 저가~고가</th><th>거래소</th></tr></thead>
+    <tbody>{{SELL_ROWS}}</tbody>
+  </table>
+</details>
+</div>
+
+<h2>실행규칙 4개를 오늘에 대입하면</h2>
+<p>규칙은 답변 본문에 적은 것과 같습니다. 오늘 결과는 0주로 실제와 같았고, 달라지는 것은 세 번의 정정과 지금 남아 있는 두 주문이 생기지 않는다는 점입니다.</p>
+<div class="card scroll">
+<table class="rules">
+  <thead><tr><th>규칙</th><th>오늘 그 시각에 본 값</th><th>규칙이 시키는 행동</th></tr></thead>
+  <tbody>
+    <tr><td>규칙 1</td><td>시가 1,762,000원은 9/30 종가보다 0.79% 낮은 갭하락 출발이었습니다. 30분 간격 점검에서 주가가 처음 전일종가 위아래 0.25% 안에 온 시각은 {{R1T}}({{R1PRICE}}원, 전일 대비 {{R1VS}})이고, 그때 지수 대비 강도는 {{R1RS}}, 30분 전({{R1PREVT}})은 {{R1PREV}}였습니다.</td><td class="ok">두 시점 모두 지수보다 강해 통과. 규칙 2로 넘어갑니다.</td></tr>
+    <tr><td>규칙 2</td><td>{{R1T}} 전까지 1분 종가가 전일종가를 위아래로 {{CROSS}}번 오갔고, 위에서 내려와 전일종가를 건드린 봉이 {{TOUCH}}개였습니다.</td><td>당일 시가 1,762,000원에 한국거래소 지정가 2주. 전일종가 자리 몫은 3번 넘게 눌렸으므로 0주. {{R1T}} 이후 최저가는 {{LOWR1}}원이라 시가 주문은 닿지 않았습니다.</td></tr>
+    <tr><td>규칙 3</td><td>{{R1T}} 이후 지수 대비 강도가 0 이하로 내려간 분은 {{RULE3}}.</td><td>강도 조건으로는 취소하지 않고, 15:00에 남은 주문을 취소합니다.</td></tr>
+    <tr><td>규칙 4</td><td>11:27, 11:31, 12:04 세 번 매수가를 위로 고쳤고, 고친 가격은 그 분 저가보다 1만~1만9천원 아래였습니다.</td><td class="miss">세 번 모두 하지 않을 정정입니다. 그대로 두거나 취소하고 접습니다.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>같은 상황 72건에서 본 것</h2>
+<p>코스피 대형주 15종목의 최근 60거래일에서, 0.3% 넘게 갭하락 출발한 뒤 10시~13시 30분 간격 점검에서 처음 전일종가 위아래 0.25% 안에 온 순간을 72건 찾았습니다. 성과는 그날 종가까지이고, 매매비용 0.23%를 뺐습니다. 시가 대기 주문이 체결되지 않은 날은 0으로 셌습니다.</p>
+<div class="card scroll">
+<table>
+  <thead><tr><th>묶음</th><th class="num">건수</th><th class="num">전일종가에서 바로 매수</th><th class="num">시가에 걸고 대기</th><th class="num">시가 아래로 다시 내려간 비율</th></tr></thead>
+  <tbody>
+    <tr><td>전체</td><td class="num">72</td><td class="num">-0.30%</td><td class="num">-0.07%</td><td class="num">36%</td></tr>
+    <tr><td>지금과 30분 전 모두 지수보다 강함</td><td class="num">47</td><td class="num">-0.13%</td><td class="num">+0.17%</td><td class="num">34%</td></tr>
+    <tr><td>그렇지 않음</td><td class="num">25</td><td class="num">-0.64%</td><td class="num">-0.53%</td><td class="num">40%</td></tr>
+  </tbody>
+</table>
+<p class="caption">전체 72건에서 바로 산 쪽과 대기한 쪽의 차이는 날짜 단위로 다시 뽑아 5,000번 계산한 95% 구간이 -0.62~+0.13%p라 우연으로 설명되는 범위입니다. 강세가 이어진 47건 가운데 전일종가보다 2.5% 넘게 내려간 날은 5건이었습니다. 이 묶음 나누기는 결과를 본 뒤 더한 갈래라서 확정 검증이 아니라 방향 확인입니다.</p>
+</div>
+
+<h2>오늘 매도 체결과 비용</h2>
+<p>오전에 판 5주의 실제 수수료와 세금은 주문내역 파일 값을 그대로 더했습니다. 매도 금액 {{AMT}}원에 비용 {{COST}}원으로 {{COSTPCT}}입니다(수수료 {{FEE}}원, 세금 {{TAX}}원). 5주를 언제 얼마에 샀는지는 9월 여러 날에 걸친 매매라 이 보고서에서 손익을 따로 계산하지 않았습니다.</p>
+
+<h2>장 시작 전에 볼 수 있던 것</h2>
+<p>마이크론은 미국 9/30 장 마감 뒤 실적을 냈고, 시간외 거래는 크게 오르내린 뒤 한국 시각 08:59에 1,069.00달러로 정규장 종가 1,065.11달러보다 0.37% 높게 끝났습니다. 필라델피아 반도체지수도 9/30 종가가 전날과 거의 같았습니다. 그런데 10/1 시가는 하이닉스 -0.79%, 삼성전자 -0.74%로 코스피 -0.34%보다 두 배 넘게 낮게 출발했습니다. 미국 쪽 숫자로는 이 차이가 설명되지 않아, 갭하락의 원인은 확인 필요로 남겼습니다.</p>
+
+<h2>확인 필요</h2>
+<p>오늘 홍인기 일지는 장 마감 뒤에 올라옵니다. 11:00 기관과 외국인 장중 가집계와, 오전 09:07~10:08에 5주를 판 근거는 아직 확보하지 못했습니다. 시세는 네이버 1분봉으로, 넥스트레이드 체결이 섞인 통합시세로 보여 한국거래소 단독 체결과 한 호가 차이가 날 수 있습니다.</p>
+
+<footer>
+  <p>자료는 네이버 증권 1분봉(하이닉스, 삼성전자, 코스피, {{LAST}}까지), 사용자님이 올린 9/29~10/1 일별 주문내역, 야후 파이낸스 마이크론과 필라델피아 반도체지수 5분봉(시간외 포함)입니다. 72건 비교는 같은 폴더의 test_wait_for_open.py, test_extra_conditions.py, check_deep_bid.py로 다시 돌릴 수 있습니다.</p>
+</footer>
+</div>
+
+<script>
+const D = /*__DATA__*/null;
+const LC = window.LightweightCharts;
+const root = document.documentElement;
+const v = n => getComputedStyle(root).getPropertyValue(n).trim();
+const won = p => Math.round(p).toLocaleString("ko-KR");
+const pct = p => (p > 0 ? "+" : "") + p.toFixed(2) + "%p";
+const hhmm = t => { const d = new Date(t * 1000); return String(d.getUTCHours()).padStart(2, "0") + ":" + String(d.getUTCMinutes()).padStart(2, "0"); };
+let price, rsChart, candle, rsSeries, pcLine, openLine, ruleSeries, lifeSeries = [];
+
+function palette() {
+  return { card: v("--card"), muted: v("--muted"), grid: v("--grid"), border: v("--border"), text: v("--text"),
+           buy: v("--buy"), sell: v("--sell"), mod: v("--mod"), rule: v("--rule"), open: v("--open") };
+}
+function baseOptions(c) {
+  return { autoSize: true,
+           layout: { background: { type: "solid", color: c.card }, textColor: c.muted, fontFamily: "IBM Plex Mono, monospace" },
+           grid: { vertLines: { color: c.grid }, horzLines: { color: c.grid } },
+           rightPriceScale: { borderColor: c.border },
+           timeScale: { borderColor: c.border, timeVisible: true, secondsVisible: false },
+           crosshair: { mode: LC.CrosshairMode.Normal } };
+}
+function markerColors(c) {
+  return D.markers.map(m => Object.assign({}, m, { color: { sell: c.sell, buy: c.buy, mod: c.mod, rule: c.rule }[m.role] || m.color }));
+}
+function build() {
+  const c = palette();
+  price = LC.createChart(document.getElementById("price"), Object.assign(baseOptions(c), { localization: { priceFormatter: won } }));
+  price.priceScale("right").applyOptions({ scaleMargins: { top: 0.06, bottom: 0.24 } });
+  candle = price.addCandlestickSeries({ upColor: "#ef4444", downColor: "#3b82f6", borderUpColor: "#ef4444", borderDownColor: "#3b82f6",
+                                        wickUpColor: "#ef4444", wickDownColor: "#3b82f6", priceFormat: { type: "price", precision: 0, minMove: 500 } });
+  candle.setData(D.bars);
+  const vol = price.addHistogramSeries({ priceScaleId: "vol", priceFormat: { type: "volume" }, lastValueVisible: false, priceLineVisible: false });
+  price.priceScale("vol").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+  vol.setData(D.vols);
+  pcLine = candle.createPriceLine({ price: D.pc, color: c.text, lineWidth: 1, lineStyle: LC.LineStyle.Dashed, axisLabelVisible: true, title: "9/30 종가" });
+  openLine = candle.createPriceLine({ price: D.open, color: c.open, lineWidth: 1, lineStyle: LC.LineStyle.Dashed, axisLabelVisible: true, title: "10/1 시가" });
+  D.life.forEach(L => {
+    const s = price.addLineSeries({ color: c.buy, lineWidth: 2, lineStyle: LC.LineStyle.Solid, lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false });
+    s.setData([{ time: L.t0, value: L.price }, { time: L.t1, value: L.price }]);
+    lifeSeries.push(s);
+  });
+  if (D.rule_line) {
+    ruleSeries = price.addLineSeries({ color: c.rule, lineWidth: 3, lineStyle: LC.LineStyle.Dotted, lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false });
+    ruleSeries.setData([{ time: D.rule_line.t0, value: D.rule_line.price }, { time: D.rule_line.t1, value: D.rule_line.price }]);
+  }
+  candle.setMarkers(markerColors(c));
+
+  rsChart = LC.createChart(document.getElementById("rs"), Object.assign(baseOptions(c), { localization: { priceFormatter: pct } }));
+  rsSeries = rsChart.addBaselineSeries({ baseValue: { type: "price", price: 0 }, lineWidth: 2,
+    topLineColor: "#ef4444", topFillColor1: "rgba(239,68,68,0.30)", topFillColor2: "rgba(239,68,68,0.04)",
+    bottomLineColor: "#3b82f6", bottomFillColor1: "rgba(59,130,246,0.04)", bottomFillColor2: "rgba(59,130,246,0.30)",
+    priceFormat: { type: "price", precision: 2, minMove: 0.01 } });
+  rsSeries.setData(D.rs);
+
+  let syncing = false;
+  const sync = (from, to) => r => { if (syncing || !r) return; syncing = true; to.timeScale().setVisibleLogicalRange(r); syncing = false; };
+  price.timeScale().subscribeVisibleLogicalRangeChange(sync(price, rsChart));
+  rsChart.timeScale().subscribeVisibleLogicalRangeChange(sync(rsChart, price));
+
+  const rsMap = new Map(D.rs.map(p => [p.time, p.value]));
+  const volMap = new Map(D.vols.map(p => [p.time, p.value]));
+  const out = document.getElementById("readout");
+  price.subscribeCrosshairMove(p => {
+    if (!p.time) return;
+    const b = p.seriesData.get(candle);
+    if (!b) return;
+    const r = rsMap.get(p.time);
+    out.textContent = hhmm(p.time) + "  시가 " + won(b.open) + "  고가 " + won(b.high) + "  저가 " + won(b.low) + "  종가 " + won(b.close)
+      + "  거래량 " + won(volMap.get(p.time) || 0) + "주" + (r === undefined ? "" : "  지수 대비 " + pct(r));
+  });
+  price.timeScale().setVisibleLogicalRange({ from: -14, to: D.bars.length + 3 });
+}
+function applyTheme() {
+  const c = palette();
+  [price, rsChart].forEach(ch => ch.applyOptions({ layout: { background: { type: "solid", color: c.card }, textColor: c.muted },
+    grid: { vertLines: { color: c.grid }, horzLines: { color: c.grid } }, rightPriceScale: { borderColor: c.border }, timeScale: { borderColor: c.border } }));
+  pcLine.applyOptions({ color: c.text });
+  openLine.applyOptions({ color: c.open });
+  lifeSeries.forEach(s => s.applyOptions({ color: c.buy }));
+  if (ruleSeries) ruleSeries.applyOptions({ color: c.rule });
+  candle.setMarkers(markerColors(c));
+}
+function setTheme(t) {
+  root.setAttribute("data-theme", t);
+  const btn = document.getElementById("theme");
+  btn.textContent = t === "light" ? "어두운 화면으로 보기" : "밝은 화면으로 보기";
+  btn.setAttribute("aria-pressed", t === "light" ? "true" : "false");
+  try { localStorage.setItem("review-theme", t); } catch (e) { }
+}
+(function init() {
+  let t = "dark";
+  try { t = localStorage.getItem("review-theme") || "dark"; } catch (e) { }
+  setTheme(t);
+  if (!LC || !D) {
+    document.getElementById("readout").textContent = "차트 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침하시면 차트가 나옵니다. 아래 표는 연결 없이도 읽을 수 있습니다.";
+    return;
+  }
+  build();
+  document.getElementById("theme").addEventListener("click", () => {
+    setTheme(root.getAttribute("data-theme") === "light" ? "dark" : "light");
+    applyTheme();
+  });
+  const box = document.getElementById("jump");
+  D.jumps.forEach(j => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = j.text;
+    b.addEventListener("click", () => price.timeScale().setVisibleRange({ from: j.ts - 25 * 60, to: j.ts + 35 * 60 }));
+    box.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
